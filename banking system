@@ -1,0 +1,201 @@
+import re
+import random
+import maskpass
+from rich.console import Console
+console=Console()
+account_details = list()
+account_nos=list()
+
+class Bank_account:
+    def __init__(self,name,email,phone,aadhar):
+        self.name=name
+        self.email=email
+        self.phone=ph
+        self.aadhar=aadhar
+        self.account = {"name":name, "email": email,"phone":phone,"aadhar":aadhar}
+        #self.user={"name":name, "email": email,"phone":phone,"aadhar":aadhar}
+    def acc_validation(self):
+        u=0
+        for i in account_details:
+            if i["aadhar"]==self.aadhar:
+                console.print("\n\t\t\tAlready an account exist for this user! Please try to login..",style="bold white on black")
+                u = 1
+                break
+        if u==0:
+            account_details.append(self.account)
+            console.print("\n\t\t\tAccount created successfully..",style="bold white on black")
+            new=0
+            while new==0:
+                new_accno=random.randint(1000000000,9999999999)
+                if new_accno not in account_nos:
+                   console.print("\t\t\t\tYour account number is\t",new_accno,".")
+                   pin=random.randint(100000,999999)
+                   console.print("\t\t\t\tYour PIN is\t",pin,".",end="\t")
+                   console.print("\t CAUTION! Do not share this pin -- Set your new PIN using 'Change PIN'.\n",style="red")
+                   self.account["acc_no"]= str(new_accno)
+                   self.account["balance"]=0
+                   self.account["pin"]=str(pin)
+                   account_nos.append(new_accno)
+                   new=1
+
+
+
+class Login():
+    def validate(self):
+        v=0
+        while not v:
+            accno = input("\t\t Enter your Account Number\t : ")
+            for e in account_details:
+                if (e["acc_no"] == accno):
+                    v=1
+                    break
+            if not v:
+                console.print("\t\t\t\t\tEnter a valid account Number..!!\n",style="bold white on black")
+            else:
+                id = maskpass.askpass(prompt="\t\t Enter your PIN\t\t\t : ",mask="*")
+                if (e["pin"]==id):
+                    return e
+                else:
+                    console.print("\t\t\t\t\t PIN Number Error..!!!\n",style="bold white on black")
+                    v=0
+
+
+
+
+    def change_pin(self,element):
+        console.print("\n\t\t\t\tHello ",element["name"],style="bold white on black")
+        m=1
+        while m==1:
+            np=0
+            while not np:
+                new_pin=maskpass.askpass(prompt="\t\t\t\t\tEnter your New PIN\t\t: ",mask="*")
+                #new_pin=str(new_pin)
+                nppattern="\d{6}$"
+                np=re.match(nppattern,new_pin)
+                if not np:
+                    console.print("\t\t\t\t\t\t\tPIN must be a 6 digit Number!!!\n",style="bold white on black")
+            #new_pin=int(new_pin)
+            conf_pin=maskpass.askpass(prompt="\t\t\t\t\tConfirm PIN\t\t\t: ",mask="*")
+            if(new_pin==conf_pin):
+                for i in account_details:
+                    if i["acc_no"]==element["acc_no"]:
+                        i["pin"]=new_pin
+                        console.print("\t\t\t\t\t\t\tPIN changed successfully..\n",style="bold white on black")
+                m=0
+            else:
+                console.print("\t\t\t\t\t\tPIN Does not Match!!\n",style="bold white on black")
+                m=1
+
+    def login_operations(self, e):
+        m = 0
+        while (m == 0):
+            y = input(
+                "\t\t\t\t\t1.Deposit\n\t\t\t\t\t2.Withdraw\n\t\t\t\t\t3.Balance\n\t\t\t\t\t4.Exit\n\t\t\t\t\t\tEnter your choice... :")
+            if y == '1':
+                self.deposit(e)
+            elif y == '2':
+                self.withdraw(e)
+            elif y == '3':
+                console.print("\t\t\t\t\t\t\tYour Balance is ", e["balance"], "Rupees\n")
+            elif y == '4':
+                m = 1
+            else:
+                console.print("\t\t\t\t\t\t\tInvalid input..!!!\n", style="bold white on black")
+
+    def deposit(self,element):
+        #print(element)
+        self.dep_amount=int(input("\t\t\t\t\t\t\tEnter the amount you want to deposit: "))
+        element["balance"]=(element["balance"]+self.dep_amount)
+        console.print("\t\t\t\t\t\t\t\tDeposited successfully..\n",style="bold white on black")
+        #print(account_details)
+
+
+    def withdraw(self,element):
+        self.withdraw_amount=int(input("\t\t\t\t\t\t\tEnter the amount you want to withdraw : "))
+        if (self.withdraw_amount>element["balance"]):
+            console.print("\t\t\t\t\t\t\t\tYou have Insufficient balance..!!!",style="bold white on black")
+        else:
+            element["balance"]=(element["balance"]-self.withdraw_amount)
+            console.print("\t\t\t\t\t\t\t\tWithdrawed successfully..\n",style="bold white on black")
+
+
+    def del_account(self,del_acc):
+        print("\n\t\t\t\tAre you sure ",del_acc["name"],",",end=' ')
+        s=input("you want to delete the account ?(Y/N) :")
+        if ((s=='y')|(s=='Y')):
+            account_details.remove(del_acc)
+            console.print("\n\t\t\t\t\tYour account DELETED..!!\n",style="bold white on black")
+
+
+console.print("\n WELCOME TO STATE BANK OF INDIA\n",style='bold white on black')
+choice=0
+acc_obj=["ac1","ac2","ac3","ac4","ac5"]
+i=0
+while choice==0:
+    x=input("  1. Create account \n  2. Change PIN \n  3. Login (Deposit/ Withdraw/ Balance) \n  4. Delete account\n  5. Exit \n     Enter your Option... : ")
+    if x=='1':
+        nam=input("\t\tEnter your Name\t\t\t: ")
+        nam=nam.upper()
+        m=0
+        while not m:
+            ema=input("\t\tEnter your email\t\t: ")
+            epattern="([A-Za-z0-9]+[.-_])*[A-Za-z0-9]+@[A-Za-z0-9-]+(\.[A-Z|a-z]{2,})+"
+            m=re.match(epattern,ema)
+            if m:
+                p = 0
+                while not p:
+                    try:
+                        ph = int(input("\t\tEnter your Mobile No\t\t: "))
+                        ph=str(ph)
+                        phpatt="\d{10}$"
+                        p=re.match(phpatt,ph)
+                        if not p:
+                            console.print("\t\t\t\t\t\tEnter a valid 10 digit mobile no..!!!\n",style="bold white on black")
+                    except:
+                        console.print("\t\t\t\t\t\tYou can't enter charecters in this field..!!!\n",style="bold white on black")
+
+                y=0
+                while not y:
+                    try:
+                        aadhar=int(input("\t\tEnter your aadhar number\t: "))
+                        aadhar=str(aadhar)
+                        pat = "\d{12}+$"
+                        y = re.match(pat,aadhar)
+                        if not y:
+                            console.print("\t\t\t\t\t\tAadhar number must contain exactly 12 digits..!!!\n",style="bold white on black")
+                    except:
+                        console.print("\t\t\t\t\t\tYou can't enter charecters in this field..!!!\n",style="bold white on black")
+
+                acc_obj[i]=Bank_account(nam,ema,ph,aadhar)
+                acc_obj[i].acc_validation()
+                i=i+1
+            else:
+                console.print("\t\t\t\t\t\tEnter a valid email id..!!!\n",style="bold white on black")
+
+    elif x=='2':
+        pin_ch_obj=Login()
+        exist=pin_ch_obj.validate()
+        if exist:
+            pin_ch_obj.change_pin(exist)
+
+    elif x=='3':
+        log_obj=Login()
+        exist = log_obj.validate()
+        if exist:
+            console.print("\t\t\t  Login successfull..",style="bold white on black")
+            console.print("\n\t\t\t\tWelcome", exist["name"],style="bold white on black")
+            log_obj.login_operations(exist)
+    elif x=='4':
+        del_obj=Login()
+        exist=del_obj.validate()
+        if exist:
+            del_obj.del_account(exist)
+    elif x=='5':
+        choice=1
+    else:
+        console.print("\t\t\tInvalid Option!!\n",style="bold white on black")
+
+
+
+
+
